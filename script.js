@@ -1,127 +1,200 @@
 let currentUser = null;
-let currentPage = "page1";
-let pages = {};
+let currentPage = 1;
+let currentBlock = null;
+let dragging = false;
 
-// REGISTRATION & LOGIN
+// ========== AUTH ==========
+
 function register() {
-  const u = document.getElementById("username").value;
-  const p = document.getElementById("password").value;
+  const u = username.value.trim();
+  const p = password.value.trim();
   if (localStorage.getItem("user_" + u)) {
-    showMsg("Пользователь уже существует!");
+    authError.textContent = "User already exists";
   } else {
     localStorage.setItem("user_" + u, JSON.stringify({ password: p, sites: {} }));
-    showMsg("Успешно зарегистрирован!");
+    login();
   }
 }
 
 function login() {
-  const u = document.getElementById("username").value;
-  const p = document.getElementById("password").value;
-  const userData = JSON.parse(localStorage.getItem("user_" + u));
-  if (userData && userData.password === p) {
+  const u = username.value.trim();
+  const p = password.value.trim();
+  const data = JSON.parse(localStorage.getItem("user_" + u));
+  if (data && data.password === p) {
     currentUser = u;
-    document.getElementById("auth").style.display = "none";
-    document.getElementById("editor").style.display = "block";
-    pages = {}; for (let i = 1; i <= 10; i++) pages["page" + i] = "";
-    showMsg("Добро пожаловать, " + u);
+    authContainer.style.display = "none";
+    editorContainer.style.display = "block";
+    userDisplay.textContent = `👤 ${u}`;
+    initPages();
   } else {
-    showMsg("Неверные данные.");
+    authError.textContent = "Wrong credentials";
   }
 }
 
-function showMsg(msg) {
-  document.getElementById("auth-msg").innerText = msg;
+// ========== PAGES ==========
+
+function initPages() {
+  for (let i = 1; i <= 10; i++) {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = "Page " + i;
+    pageSelect.appendChild(opt);
+  }
+  switchPage();
 }
 
-// DRAG & DROP
-function allowDrop(e) {
-  e.preventDefault();
+function switchPage() {
+  currentPage = pageSelect.value;
+  editor.innerHTML = "";
+  loadProject();
 }
 
-function drag(e) {
-  e.dataTransfer.setData("text/plain", e.target.id);
-}
+// ========== BLOCKS ==========
 
-function drop(e) {
-  e.preventDefault();
-  const data = e.dataTransfer.getData("text");
-  const dragged = document.getElementById(data);
-  e.target.appendChild(dragged);
-}
-
-// ADD BLOCK
-function addBlock() {
-  const type = document.getElementById("block-type").value;
-  const color = document.getElementById("block-color").value;
-  const radius = document.getElementById("border-radius").value + "px";
-  const weight = document.getElementById("font-weight").value;
-  const neon = document.getElementById("neon-effect").checked;
-  const imgFile = document.getElementById("image-upload").files[0];
-
-  const block = document.createElement("div");
-  block.className = "block";
-  block.style.backgroundColor = color;
-  block.style.borderRadius = radius;
-  block.style.fontWeight = weight;
-  block.draggable = true;
-  block.id = "block_" + Math.random();
-  block.ondragstart = drag;
-  if (neon) block.classList.add("neon");
+function createBlock(type, content = "") {
+  const div = document.createElement("div");
+  div.className = "block";
+  div.style.left = "100px";
+  div.style.top = "100px";
 
   if (type === "text") {
-    block.textContent = "Текстовый блок";
-  } else if (type === "button") {
-    const btn = document.createElement("a");
-    btn.href = "#";
-    btn.textContent = "Перейти";
-    btn.className = "btn";
-    block.appendChild(btn);
+    div.contentEditable = true;
+    div.textContent = content || "Edit me!";
   } else if (type === "image") {
-    if (imgFile) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = document.createElement("img");
-        img.src = e.target.result;
-        block.appendChild(img);
-      };
-      reader.readAsDataURL(imgFile);
-    } else {
-      alert("Загрузите изображение.");
-      return;
-    }
-  } else if (type === "code") {
-    const pre = document.createElement("pre");
-    pre.textContent = "// Код: int main() { return 0; }";
-    block.appendChild(pre);
+    const img = document.createElement("img");
+    img.src = content;
+    div.appendChild(img);
   }
 
-  document.getElementById("canvas").appendChild(block);
+  div.addEventListener("mousedown", startDrag);
+  div.addEventListener("click", () => selectBlock(div));
+  editor.appendChild(div);
 }
 
-// PAGE SWITCH
-function changePage() {
-  savePageContent(currentPage);
-  currentPage = document.getElementById("page-select").value;
-  document.getElementById("canvas").innerHTML = pages[currentPage] || "";
+function addTextBlock() {
+  createBlock("text");
 }
 
-function savePageContent(page) {
-  pages[page] = document.getElementById("canvas").innerHTML;
+function addImageBlock() {
+  uploadImage.click();
 }
 
-// SAVE / LOAD
-function saveSite(num) {
-  savePageContent(currentPage);
-  const user = JSON.parse(localStorage.getItem("user_" + currentUser));
-  user.sites["site" + num] = JSON.stringify(pages);
-  localStorage.setItem("user_" + currentUser, JSON.stringify(user));
-  alert("Сайт " + num + " сохранен.");
+uploadImage.onchange = (e) => {
+  const file = e.target.files[0];
+  if (file && file.type.startsWith("image")) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      createBlock("image", reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+// ========== STYLES & INTERACTION ==========
+
+function selectBlock(block) {
+  if (currentBlock) currentBlock.classList.remove("selected");
+  currentBlock = block;
+  block.classList.add("selected");
+  stylePanel.style.display = "block";
+
+  styleColor.value = rgbToHex(block.style.color || "#000000");
+  styleWeight.value = block.style.fontWeight || 400;
+  styleRadius.value = block.style.borderRadius.replace("px", "") || 0;
+  styleNeon.checked = block.style.textShadow.includes("neon");
 }
 
-function loadSite(num) {
-  const user = JSON.parse(localStorage.getItem("user_" + currentUser));
-  const site = user.sites["site" + num];
-  if (!site) return alert("Сайт не найден.");
-  pages = JSON.parse(site);
-  document.getElementById("canvas").innerHTML = pages[currentPage] || "";
+function deleteSelected() {
+  if (currentBlock) {
+    currentBlock.remove();
+    currentBlock = null;
+    stylePanel.style.display = "none";
+  }
+}
+
+styleColor.oninput = () => {
+  if (currentBlock) currentBlock.style.color = styleColor.value;
+};
+
+styleWeight.oninput = () => {
+  if (currentBlock) currentBlock.style.fontWeight = styleWeight.value;
+};
+
+styleRadius.oninput = () => {
+  if (currentBlock) currentBlock.style.borderRadius = styleRadius.value + "px";
+};
+
+styleNeon.onchange = () => {
+  if (currentBlock) {
+    currentBlock.style.textShadow = styleNeon.checked
+      ? "0 0 5px #0ff, 0 0 10px #0ff"
+      : "none";
+  }
+};
+
+// ========== DRAG & DROP ==========
+
+function startDrag(e) {
+  dragging = e.target;
+  const shiftX = e.clientX - dragging.getBoundingClientRect().left;
+  const shiftY = e.clientY - dragging.getBoundingClientRect().top;
+
+  function moveAt(ev) {
+    dragging.style.left = ev.pageX - shiftX + "px";
+    dragging.style.top = ev.pageY - shiftY + "px";
+  }
+
+  function stopDrag() {
+    document.removeEventListener("mousemove", moveAt);
+    document.removeEventListener("mouseup", stopDrag);
+    dragging = null;
+  }
+
+  document.addEventListener("mousemove", moveAt);
+  document.addEventListener("mouseup", stopDrag);
+}
+
+// ========== SAVE / LOAD ==========
+
+function saveProject() {
+  const blocks = [...editor.children].map((el) => ({
+    html: el.outerHTML
+  }));
+
+  const slot = projectSlot.value;
+  const data = JSON.parse(localStorage.getItem("user_" + currentUser));
+  if (!data.sites[currentPage]) data.sites[currentPage] = {};
+  data.sites[currentPage][slot] = blocks;
+  localStorage.setItem("user_" + currentUser, JSON.stringify(data));
+  alert("Saved to slot " + slot);
+}
+
+function loadProject() {
+  editor.innerHTML = "";
+  const slot = projectSlot.value;
+  const data = JSON.parse(localStorage.getItem("user_" + currentUser));
+  const blocks = data?.sites?.[currentPage]?.[slot] || [];
+  blocks.forEach((b) => {
+    const temp = document.createElement("div");
+    temp.innerHTML = b.html;
+    const node = temp.firstChild;
+    node.addEventListener("mousedown", startDrag);
+    node.addEventListener("click", () => selectBlock(node));
+    editor.appendChild(node);
+  });
+}
+
+// ========== UTILS ==========
+
+function rgbToHex(rgb) {
+  if (!rgb) return "#000000";
+  const result = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.exec(rgb);
+  if (!result) return rgb;
+  return (
+    "#" +
+    result
+      .slice(1)
+      .map((n) => parseInt(n).toString(16).padStart(2, "0"))
+      .join("")
+  );
 }
