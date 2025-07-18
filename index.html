@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cubic Site</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Cubic Site</h1>
+    <p>Official Cubic Site constructor — easy, fast and professional</p>
+  </header>
+
+  <!-- Login/Register -->
+  <section id="auth">
+    <h2>Вход или регистрация</h2>
+    <input type="text" id="username" placeholder="Имя пользователя">
+    <input type="password" id="password" placeholder="Пароль">
+    <button onclick="login()">Войти</button>
+    <button onclick="register()">Зарегистрироваться</button>
+    <p id="auth-msg"></p>
+  </section>
+
+  <!-- Pages + Controls -->
+  <section id="editor" style="display: none;">
+    <div class="page-nav">
+      <label>Страница:</label>
+      <select id="page-select" onchange="changePage()">
+        <option value="page1">1</option>
+        <option value="page2">2</option>
+        <option value="page3">3</option>
+        <option value="page4">4</option>
+        <option value="page5">5</option>
+        <option value="page6">6</option>
+        <option value="page7">7</option>
+        <option value="page8">8</option>
+        <option value="page9">9</option>
+        <option value="page10">10</option>
+      </select>
+    </div>
+
+    <div class="controls">
+      <select id="block-type">
+        <option value="text">Текст</option>
+        <option value="button">Кнопка</option>
+        <option value="image">Изображение</option>
+        <option value="code">Функциональный</option>
+      </select>
+
+      <input type="color" id="block-color" value="#ffffff" />
+      <input type="range" id="border-radius" min="0" max="50" value="0" />
+      <input type="checkbox" id="neon-effect"> Неон
+      <input type="range" id="font-weight" min="100" max="900" step="100" value="400">
+      <input type="file" id="image-upload" accept="image/*">
+      <button onclick="addBlock()">Добавить блок</button>
+    </div>
+
+    <!-- Canvas -->
+    <main id="canvas" ondrop="drop(event)" ondragover="allowDrop(event)"></main>
+
+    <!-- Save/Load -->
+    <div class="save-load">
+      <button onclick="saveSite(1)">Сохранить как сайт 1</button>
+      <button onclick="saveSite(2)">Сохранить как сайт 2</button>
+      <button onclick="saveSite(3)">Сохранить как сайт 3</button>
+      <button onclick="loadSite(1)">Загрузить сайт 1</button>
+      <button onclick="loadSite(2)">Загрузить сайт 2</button>
+      <button onclick="loadSite(3)">Загрузить сайт 3</button>
+    </div>
+  </section>
+
+  <footer>
+    <p>Powered by Cubic Site — .cubic.site</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
