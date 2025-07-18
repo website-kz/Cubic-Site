@@ -1,70 +1,59 @@
 body {
-  font-family: 'Open Sans', sans-serif;
   margin: 0;
-  background: #f2f2f2;
-  color: #222;
+  font-family: 'Open Sans', sans-serif;
 }
 
-header, footer {
-  background: #121212;
-  color: white;
-  padding: 20px;
+.auth {
   text-align: center;
+  margin-top: 50px;
 }
 
-.controls, .save-load, .page-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin: 10px;
-}
-
-#canvas {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 60vh;
+.topbar {
   padding: 10px;
+  background: #eee;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.editor {
+  position: relative;
+  height: 80vh;
+  background: #f8f8f8;
+  border: 1px solid #ccc;
+  overflow: hidden;
 }
 
 .block {
-  background: #fff;
-  border: 1px solid #ccc;
-  width: 90%;
-  max-width: 600px;
-  padding: 20px;
-  margin: 10px;
-  border-radius: 0;
-  font-weight: 400;
+  position: absolute;
+  padding: 10px;
   cursor: move;
+  user-select: none;
+  background: white;
+  border: 1px solid #999;
+  border-radius: 5px;
 }
 
-.neon {
-  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff;
-  color: #0ff;
+.block.selected {
+  outline: 2px dashed #007bff;
 }
 
 .block img {
-  max-width: 100%;
-  display: block;
+  max-width: 200px;
+  height: auto;
 }
 
-.block .btn {
-  padding: 10px 20px;
-  background: #0066ff;
-  color: white;
-  border-radius: 5px;
-  text-decoration: none;
-  display: inline-block;
-}
-
-#auth {
-  text-align: center;
-  padding: 20px;
-}
-
-#auth input {
-  margin: 5px;
+.stylePanel {
+  position: absolute;
+  top: 100px;
+  right: 10px;
   padding: 10px;
+  background: white;
+  border: 1px solid #ccc;
+  display: none;
+}
+
+.user-info {
+  margin-left: auto;
+  font-weight: bold;
 }
