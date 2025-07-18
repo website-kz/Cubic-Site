@@ -2,48 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cubic Site</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div id="authContainer" class="auth">
-    <h2>Cubic Site — Login/Register</h2>
-    <input id="username" placeholder="Username" />
-    <input id="password" type="password" placeholder="Password" />
-    <button onclick="register()">Register</button>
-    <button onclick="login()">Login</button>
-    <div id="authError"></div>
+  <div class="toolbar">
+    <button onclick="addTextBlock()">Text</button>
+    <button onclick="addImageBlock()">Image</button>
+    <button onclick="addButtonBlock()">Button</button>
+    <button onclick="addCodeBlock()">Functional</button>
+    <input type="file" id="imageUploader" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
   </div>
 
-  <div id="editorContainer" style="display:none;">
-    <div class="topbar">
-      <button onclick="addTextBlock()">Add Text</button>
-      <button onclick="addImageBlock()">Add Image</button>
-      <input type="file" id="uploadImage" accept="image/*" style="display:none;" />
-      <button onclick="saveProject()">💾 Save</button>
-      <button onclick="loadProject()">📂 Load</button>
-      <select id="projectSlot">
-        <option value="1">Site 1</option>
-        <option value="2">Site 2</option>
-        <option value="3">Site 3</option>
-      </select>
-      <select id="pageSelect" onchange="switchPage()">
-        <!-- up to 10 pages -->
-      </select>
-      <span class="user-info" id="userDisplay"></span>
-    </div>
-
-    <div id="editor" class="editor"></div>
-
-    <div class="stylePanel" id="stylePanel">
-      <label>Color: <input type="color" id="styleColor" /></label><br />
-      <label>Font weight: <input type="range" min="100" max="900" step="100" id="styleWeight" /></label><br />
-      <label>Border radius: <input type="range" min="0" max="50" step="5" id="styleRadius" /></label><br />
-      <label>Neon: <input type="checkbox" id="styleNeon" /></label><br />
-      <button onclick="deleteSelected()">🗑 Delete</button>
-    </div>
-  </div>
+  <div id="canvas" class="canvas" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
 
   <script src="script.js"></script>
 </body>
